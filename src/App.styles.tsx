@@ -22,9 +22,16 @@ export const Title = styled.h1`
   color: #797066;
 `;
 
-export const Controls = styled.nav`
+export const Score = styled.div`
+  margin: 0 0 0 0.4em;
+  font-size: 1.2em;
+`;
+
+export const Info = styled.nav`
   margin: auto 0 auto auto;
 `;
+
+export const Controls = styled.nav``;
 
 export const Button = styled.button`
   margin: 0 0 0.2em 0.4em;

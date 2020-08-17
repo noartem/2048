@@ -48,9 +48,10 @@ function toBlocks(
 }
 
 function moveRow(row: number[]) {
+  let score = 0;
   for (let i = 0; i < row.length; i++) {
     if (row.slice(i).reduce((acc, block) => block === 0 && acc, true)) {
-      return row;
+      return { row, score };
     }
 
     if (row[i] === 0) {
@@ -65,6 +66,7 @@ function moveRow(row: number[]) {
     }
 
     if (i > 0 && row[i - 1] === row[i]) {
+      score += row[i] * 2;
       row[i - 1] = row[i] * 2;
       row.splice(i, 1);
       row.push(0);
@@ -79,15 +81,23 @@ function moveRow(row: number[]) {
     }
   }
 
-  return row;
+  return { row, score };
 }
 
-const moveBlocks = (blocks: number[], direction: Direction, size: number) =>
-  toBlocks(
-    toRows(blocks.slice(), direction, size).map(moveRow),
+const moveBlocks = (blocks: number[], direction: Direction, size: number) => {
+  let newScore = 0;
+  let newBlocks = toBlocks(
+    toRows(blocks.slice(), direction, size).map((row) => {
+      const { row: newRow, score } = moveRow(row);
+      newScore += score;
+      return newRow;
+    }),
     direction,
     size
   );
+
+  return { newBlocks, newScore };
+};
 
 const randEl = <T>(arr: T[]) => arr[(arr.length * Math.random()) | 0];
 
@@ -120,7 +130,11 @@ export const nextBlocks = (
   blocks: number[],
   direction: Direction,
   size: number
-) => checkIfFail(addRandom(moveBlocks(blocks, direction, size)), size);
+) => {
+  const { newBlocks, newScore } = moveBlocks(blocks, direction, size);
+
+  return { ...checkIfFail(addRandom(newBlocks), size), newScore };
+};
 
 export const newBlocks = (size: number) =>
   addRandom(new Array(size * size).fill(0));

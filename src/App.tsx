@@ -6,6 +6,8 @@ import {
   Container,
   Header,
   Title,
+  Score,
+  Info,
   Controls,
   Button,
   Failed,
@@ -20,15 +22,27 @@ import useLocalStorage from "./useLocalStorage";
 function App() {
   const size = 4;
   const [isEnd, setIsEnd] = useLocalStorage("is-end", false);
+  const [score, setScore] = useLocalStorage("score", 0);
+  const [prevScore, setPrevScore] = useLocalStorage("score-back", score);
   const [blocks, setBlocks] = useLocalStorage("blocks", newBlocks(size));
   const [prevBlocks, setPrevBlocks] = useLocalStorage("blocks-back", blocks);
 
   const updateBlocks = (direction: Direction) => () =>
     !isEnd &&
     setBlocks((blocks) => {
-      const { newBlocks, isFailed } = nextBlocks(blocks, direction, size);
+      const { newBlocks, isFailed, newScore } = nextBlocks(
+        blocks,
+        direction,
+        size
+      );
+
       setIsEnd(isFailed);
       setPrevBlocks(blocks);
+      setScore((score) => {
+        setPrevScore(score);
+        return score + newScore;
+      });
+
       return newBlocks;
     });
 
@@ -53,6 +67,7 @@ function App() {
   const back = () => {
     setIsEnd(false);
     setBlocks(prevBlocks);
+    setScore(prevScore);
   };
 
   useShortcut("ctrl+z", back, [back]);
@@ -62,10 +77,13 @@ function App() {
       <Header>
         <Title>2048</Title>
 
-        <Controls>
-          <Button onClick={back}>Back</Button>
-          <Button onClick={reset}>Reset</Button>
-        </Controls>
+        <Info>
+          <Controls>
+            <Button onClick={back}>Back</Button>
+            <Button onClick={reset}>Reset</Button>
+          </Controls>
+          <Score>Score: {score}</Score>
+        </Info>
       </Header>
       {isEnd && (
         <Failed>
